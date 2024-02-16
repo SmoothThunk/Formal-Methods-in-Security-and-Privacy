@@ -360,7 +360,7 @@ trivial.
 qed.
 (* END FILL IN *)
 
-
+(*
 (* QUESTION 3 (33 Points)
 
    In this problem, you may not use `smt` (or `/#'), but you may use
@@ -457,4 +457,67 @@ rewrite (lez_trans 1).
 trivial.
 admit.
 trivial.
+qed.
+*)
+
+(* QUESTION 3 (33 Points)
+
+   In this problem, you may not use `smt` (or `/#'), but you may use
+   all other tactics as well as all lemmas of the EasyCrypt Library.
+
+   You may prove whatever auxiliary lemmas you need.
+
+   (Hint: do a `print` of the operator `odd`, and then search for
+   related lemmas.) *)
+
+(* operators and lemmas about integer division, and lemmas about the
+   standard ordering on the integers *)
+
+require import IntDiv StdOrder.
+import IntOrder.
+
+(* definition of being a prime number *)
+
+op is_prime (n : int) : bool =
+  2 <= n /\
+  ! exists (x : int), x %| n /\ 1 < x < n.
+
+(* BEGINNING OF AUXILIARY LEMMAS *)
+
+lemma is_prime_impl_ge2 (n : int) :
+  is_prime n => 2 <= n.
+proof. by rewrite /is_prime. qed.
+
+lemma not_prime_by_even (n : int) :
+  2 < n => 2 %| n => ! (is_prime n).
+proof.
+move => gt2_n two_dvdz_n.
+rewrite /is_prime negb_and /=.
+right; by exists 2.
+qed.
+
+(* it is possible to prove this lemma without using `odd`,
+   but this is considerably easier *)
+
+lemma even_n_or_n_pl1 (n : int) :
+  2 %| n \/ 2 %| (n + 1).
+proof.
+rewrite 2!dvdzE -2!oddPn oddS /= excluded_middle.
+qed.
+
+(* END OF AUXILIARY LEMMAS *)
+
+(* if n and n + 1 are both prime, then n = 2 *)
+
+lemma adjacent_primes_uniq_2 (n : int) :
+  is_prime n => is_prime (n + 1) => n = 2.
+proof.
+(* BEGIN FILL IN *)
+move => is_pr_n is_pr_n_plus1.
+have ge2_n : 2 <= n by apply is_prime_impl_ge2.
+apply by_contradiction => gt2_n; rewrite neq_ltz ltzNge ge2_n /= in gt2_n.
+have [even_n | even_n_pl1] : 2 %| n \/ 2 %| (n + 1) by apply even_n_or_n_pl1.
+have // : ! (is_prime n)       by rewrite not_prime_by_even.
+have // : ! (is_prime (n + 1)) by rewrite not_prime_by_even 1:ltzS.
+(* END FILL IN *)
 qed.
